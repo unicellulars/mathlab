@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>質數大挑戰 Prime Quiz</title>
+  <style>
+    :root {
+      --bg-color: #f4f7f6;
+      --card-bg: #ffffff;
+      --primary: #4a90e2;
+      --success-bg: #d4edda;
+      --success-border: #28a745;
+      --success-text: #155724;
+      --error-bg: #f8d7da;
+      --error-border: #dc3545;
+      --error-text: #721c24;
+      --text: #333333;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; }
+    .card { background: var(--card-bg); width: 100%; max-width: 500px; padding: 25px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); text-align: center; position: relative; overflow: hidden; }
+    h1 { margin-bottom: 20px; color: var(--primary); font-size: 1.8rem; }
+    
+    .form-group { margin-bottom: 20px; text-align: left; }
+    label { font-weight: bold; display: block; margin-bottom: 8px; }
+    select, button { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; margin-top: 5px; }
+    button { background-color: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+    button:active { opacity: 0.9; }
+
+    .hidden { display: none !important; }
+
+    /* 遊戲區域 */
+    .hud { display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; font-size: 1.1rem; }
+    .timer { color: #d93025; }
+    .question-box { font-size: 1.2rem; margin: 20px 0; font-weight: 500; }
+    
+    .options-grid { display: grid; gap: 10px; margin-bottom: 20px; }
+    .option-btn { 
+      background: #f8f9fa; 
+      border: 2px solid #dadce0; 
+      color: var(--text); 
+      font-size: 1.2rem; 
+      font-weight: bold; 
+      padding: 15px; 
+      border-radius: 10px; 
+      cursor: pointer; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center;
+      transition: all 0.2s ease;
+    }
+    .option-btn.selected { border-color: var(--primary); background-color: #e8f0fe; }
+
+    /* 答題回饋樣式 (根據 3-4 修正) */
+    .option-btn.opt-correct {
+      background-color: var(--success-bg) !important;
+      border-color: var(--success-border) !important;
+      color: var(--success-text) !important;
+    }
+    .option-btn.opt-wrong {
+      background-color: var(--error-bg) !important;
+      border-color: var(--error-border) !important;
+      color: var(--error-text) !important;
+    }
+
+    /* 排行榜分頁 */
+    .tab-container { display: flex; gap: 10px; margin-bottom: 15px; }
+    .tab-btn { flex: 1; padding: 10px; background: #e9ecef; color: #495057; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    .tab-btn.active { background: var(--primary); color: white; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.95rem; }
+    th, td { border-bottom: 1px solid #eee; padding: 10px 5px; text-align: center; }
+    th { background-color: #f8f9fa; }
+  </style>
+</head>
+<body>
+
+<div class="card" id="app">
+  <!-- 1. 設置頁面 -->
+  <div id="setup-screen">
+    <h1>質數挑戰</h1>
+    <div class="form-group">
+      <label for="difficulty">選擇難度</label>
+      <select id="difficulty">
+        <option value="basic">基礎挑戰 =單選題=</option>
+        <option value="advanced">進階挑戰 =多選題=</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="question-count">測驗題數</label>
+      <select id="question-count">
+        <option value="10">10 題</option>
+        <option value="15">15 題</option>
+        <option value="20">20 題</option>
+      </select>
+    </div>
+    <button onclick="startGame()">開始遊戲</button>
+    <button onclick="showLeaderboardScreen()" style="background-color: #6c757d; margin-top: 10px;">查看排行榜</button>
+  </div>
+
+  <!-- 2. 遊戲進行頁面 -->
+  <div id="game-screen" class="hidden">
+    <div class="hud">
+      <span id="progress-text">第 1/10 題</span>
+      <span class="timer">倒數: <span id="time-left">3</span>s</span>
+    </div>
+    <div class="question-box" id="question-prompt">請選出其中的質數：</div>
+    <div class="options-grid" id="options-container"></div>
+    <button id="submit-btn" class="hidden" onclick="submitMultiAnswer()">確認送出</button>
+  </div>
+
+  <!-- 3. 測驗結果頁面 -->
+  <div id="result-screen" class="hidden">
+    <h1>測驗結束！</h1>
+    <p style="font-size: 1.1rem; color: #555; margin-top: 5px;" id="mode-summary"></p>
+    <p style="font-size: 1.3rem; font-weight: bold; margin: 15px 0;" id="final-score"></p>
+    <p style="color: #666; margin-bottom: 20px;" id="final-time"></p>
+    <div class="form-group">
+      <input type="text" id="player-name" placeholder="請輸入您的名字以登錄排行榜" maxlength="10" style="padding: 10px; width: 100%; border: 1px solid #ccc; border-radius: 8px;">
+    </div>
+    <button onclick="saveScore()">儲存成績</button>
+    <button onclick="resetToHome()" style="background-color: #6c757d; margin-top: 10px;">返回首頁</button>
+  </div>
+
+  <!-- 4. 排行榜頁面 -->
+  <div id="leaderboard-screen" class="hidden">
+    <h1>🏆 競賽排行榜 🏆</h1>
+    
+    <!-- 分開顯示基礎與進階排行榜 -->
+    <div class="tab-container">
+      <button class="tab-btn active" id="tab-basic" onclick="switchLeaderboardTab('basic')">基礎挑戰</button>
+      <button class="tab-btn" id="tab-advanced" onclick="switchLeaderboardTab('advanced')">進階挑戰</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>名次</th>
+          <th>玩家</th>
+          <th>答對題數</th>
+          <th>總用時</th>
+        </tr>
+      </thead>
+      <tbody id="leaderboard-body"></tbody>
+    </table>
+    <button onclick="resetToHome()" style="margin-top: 20px;">返回首頁</button>
+  </div>
+</div>
+
+<script>
+  // 1~100 的質數清單
+  const PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97];
+  const NON_PRIMES = Array.from({length: 100}, (_, i) => i + 1).filter(n => !PRIMES.includes(n));
+
+  let config = { mode: 'basic', totalQuestions: 10, timeLimit: 3 };
+  let gameState = {
+    currentIndex: 0,
+    score: 0,
+    totalTimeSpent: 0,
+    timer: null,
+    timeRemaining: 0,
+    startTime: 0,
+    currentOptions: [],
+    selectedIndices: [],
+    isAnsweringLocked: false
+  };
+
+  let activeLeaderboardTab = 'basic';
+
+  function isPrime(n) { return PRIMES.includes(n); }
+
+  function getRandomElements(arr, count) {
+    const shuffled = [...arr].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+  }
+
+  function startGame() {
+    const mode = document.getElementById('difficulty').value;
+    const totalQuestions = parseInt(document.getElementById('question-count').value);
+    
+    // 3-3 修正：基礎 3 秒，進階 6 秒
+    config = {
+      mode: mode,
+      totalQuestions: totalQuestions,
+      timeLimit: mode === 'basic' ? 3 : 6
+    };
+
+    gameState.currentIndex = 0;
+    gameState.score = 0;
+    gameState.totalTimeSpent = 0;
+
+    switchScreen('game-screen');
+    nextQuestion();
+  }
+
+  function nextQuestion() {
+    if (gameState.currentIndex >= config.totalQuestions) {
+      endGame();
+      return;
+    }
+
+    gameState.currentIndex++;
+    gameState.selectedIndices = [];
+    gameState.isAnsweringLocked = false;
+
+    document.getElementById('progress-text').innerText = `第 ${gameState.currentIndex}/${config.totalQuestions} 題`;
+    
+    generateQuestionData();
+    renderQuestion();
+
+    gameState.timeRemaining = config.timeLimit;
+    document.getElementById('time-left').innerText = gameState.timeRemaining;
+    gameState.startTime = Date.now();
+
+    clearInterval(gameState.timer);
+    gameState.timer = setInterval(() => {
+      gameState.timeRemaining--;
+      document.getElementById('time-left').innerText = gameState.timeRemaining;
+      if (gameState.timeRemaining <= 0) {
+        clearInterval(gameState.timer);
+        evaluateAnswer(true); // 時間到自動結算
+      }
+    }, 1000);
+  }
+
+  function generateQuestionData() {
+    if (config.mode === 'basic') {
+      const correct = getRandomElements(PRIMES, 1)[0];
+      const wrongs = getRandomElements(NON_PRIMES, 2);
+      gameState.currentOptions = [correct, ...wrongs].sort(() => 0.5 - Math.random());
+    } else {
+      const primeCount = Math.floor(Math.random() * 5) + 1;
+      const nonPrimeCount = 5 - primeCount;
+      const primes = getRandomElements(PRIMES, primeCount);
+      const nonPrimes = getRandomElements(NON_PRIMES, nonPrimeCount);
+      gameState.currentOptions = [...primes, ...nonPrimes].sort(() => 0.5 - Math.random());
+    }
+  }
+
+  function renderQuestion() {
+    const container = document.getElementById('options-container');
+    const submitBtn = document.getElementById('submit-btn');
+    const prompt = document.getElementById('question-prompt');
+    container.innerHTML = '';
+
+    if (config.mode === 'basic') {
+      prompt.innerText = "請選出唯一的質數：";
+      submitBtn.classList.add('hidden');
+      gameState.currentOptions.forEach((num, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerText = num;
+        btn.onclick = () => selectBasicOption(index);
+        container.appendChild(btn);
+      });
+    } else {
+      prompt.innerText = "請選出所有質數（1~5個）：";
+      submitBtn.classList.remove('hidden');
+      gameState.currentOptions.forEach((num, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerText = num;
+        btn.onclick = () => toggleAdvancedOption(index, btn);
+        container.appendChild(btn);
+      });
+    }
+  }
+
+  function selectBasicOption(index) {
+    if (gameState.isAnsweringLocked) return;
+    clearInterval(gameState.timer);
+    gameState.selectedIndices = [index];
+    evaluateAnswer();
+  }
+
+  function toggleAdvancedOption(index, btn) {
+    if (gameState.isAnsweringLocked) return;
+    const pos = gameState.selectedIndices.indexOf(index);
+    if (pos === -1) {
+      gameState.selectedIndices.push(index);
+      btn.classList.add('selected');
+    } else {
+      gameState.selectedIndices.splice(pos, 1);
+      btn.classList.remove('selected');
+    }
+  }
+
+  function submitMultiAnswer() {
+    if (gameState.isAnsweringLocked) return;
+    clearInterval(gameState.timer);
+    evaluateAnswer();
+  }
+
+  /* 3-4 修正：直接公佈答案於選項上 */
+  function evaluateAnswer(isTimeout = false) {
+    gameState.isAnsweringLocked = true;
+    
+    // 計算該題用時
+    const timeSpent = (Date.now() - gameState.startTime) / 1000;
+    gameState.totalTimeSpent += Math.min(timeSpent, config.timeLimit);
+
+    let isCorrect = false;
+
+    if (!isTimeout) {
+      if (config.mode === 'basic') {
+        const selectedVal = gameState.currentOptions[gameState.selectedIndices[0]];
+        isCorrect = isPrime(selectedVal);
+      } else {
+        const selectedValues = gameState.selectedIndices.map(i => gameState.currentOptions[i]);
+        const actualPrimes = gameState.currentOptions.filter(isPrime);
+        
+        const selectedAllPrimes = actualPrimes.every(p => selectedValues.includes(p));
+        const noExtraNonPrimes = selectedValues.every(isPrime);
+        
+        isCorrect = selectedAllPrimes && noExtraNonPrimes;
+      }
+    }
+
+    if (isCorrect) gameState.score++;
+
+    // 著色回饋邏輯：
+    // 正確答案 (質數) -> 綠底
+    // 答錯選到的選項 -> 紅底
+    const optionBtns = document.querySelectorAll('.option-btn');
+    optionBtns.forEach((btn, index) => {
+      const num = gameState.currentOptions[index];
+      const isSelected = gameState.selectedIndices.includes(index);
+      const isNumPrime = isPrime(num);
+
+      if (isNumPrime) {
+        // 正確選項均反綠底
+        btn.classList.add('opt-correct');
+      } else if (isSelected && !isNumPrime) {
+        // 答錯選項（選到非質數）反紅底
+        btn.classList.add('opt-wrong');
+      }
+    });
+
+    // 顯示答案結果 1 秒後自動跳下一題
+    setTimeout(() => {
+      nextQuestion();
+    }, 1000);
+  }
+
+  function endGame() {
+    switchScreen('result-screen');
+    const modeName = config.mode === 'basic' ? '基礎挑戰' : '進階挑戰';
+    document.getElementById('mode-summary').innerText = `挑戰模式：${modeName}`;
+    document.getElementById('final-score').innerText = `答對題數：${gameState.score} / ${config.totalQuestions}`;
+    document.getElementById('final-time').innerText = `總消耗秒數：${gameState.totalTimeSpent.toFixed(2)} 秒`;
+  }
+
+  /* 3-6 修正：分開儲存與計算排行榜 */
+  function saveScore() {
+    const nameInput = document.getElementById('player-name');
+    const name = nameInput.value.trim() || '無名氏';
+    
+    const newRecord = {
+      name: name,
+      mode: config.mode, // 紀錄模式 basic / advanced
+      score: gameState.score,
+      time: parseFloat(gameState.totalTimeSpent.toFixed(2)),
+      total: config.totalQuestions,
+      date: new Date().toLocaleDateString()
+    };
+
+    let leaderboard = JSON.parse(localStorage.getItem('prime_quiz_leaderboard_v2') || '[]');
+    leaderboard.push(newRecord);
+
+    localStorage.setItem('prime_quiz_leaderboard_v2', JSON.stringify(leaderboard));
+
+    nameInput.value = '';
+    activeLeaderboardTab = config.mode;
+    showLeaderboardScreen();
+  }
+
+  function showLeaderboardScreen() {
+    switchScreen('leaderboard-screen');
+    renderLeaderboardTable();
+  }
+
+  function switchLeaderboardTab(mode) {
+    activeLeaderboardTab = mode;
+    renderLeaderboardTable();
+  }
+
+  function renderLeaderboardTable() {
+    // 切換頁籤樣式
+    document.getElementById('tab-basic').classList.toggle('active', activeLeaderboardTab === 'basic');
+    document.getElementById('tab-advanced').classList.toggle('active', activeLeaderboardTab === 'advanced');
+
+    const tbody = document.getElementById('leaderboard-body');
+    tbody.innerHTML = '';
+
+    let leaderboard = JSON.parse(localStorage.getItem('prime_quiz_leaderboard_v2') || '[]');
+    
+    // 篩選對應難度的資料
+    let filteredData = leaderboard.filter(item => item.mode === activeLeaderboardTab);
+
+    // 優先順序：1. 題數多者勝 2. 秒數少者勝
+    filteredData.sort((a, b) => {
+      if (b.score !== a.score) {
+        return b.score - a.score;
+      }
+      return a.time - b.time;
+    });
+
+    // 取前 10 名
+    filteredData = filteredData.slice(0, 10);
+
+    if (filteredData.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4">尚無紀錄</td></tr>';
+      return;
+    }
+
+    filteredData.forEach((item, index) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${index + 1}</td>
+        <td>${escapeHtml(item.name)}</td>
+        <td>${item.score}/${item.total}</td>
+        <td>${item.time}s</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function resetToHome() {
+    switchScreen('setup-screen');
+  }
+
+  function switchScreen(screenId) {
+    ['setup-screen', 'game-screen', 'result-screen', 'leaderboard-screen'].forEach(id => {
+      document.getElementById(id).classList.add('hidden');
+    });
+    document.getElementById(screenId).classList.remove('hidden');
+  }
+
+  function escapeHtml(text) {
+    return text.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
+  }
+</script>
+</body>
+</html>
