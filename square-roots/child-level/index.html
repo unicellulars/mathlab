@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>平方數與平方根挑戰</title>
+    <!-- 引入 Google Fonts (Noto Sans TC 提供全站統一的中文字體) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- 引入 MathJax 渲染 LaTeX 數學算式 -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #f4f6f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 16px;
+            color: #0f172a;
+        }
+
+        .card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 520px;
+            padding: 32px 24px;
+            text-align: center;
+        }
+
+        h1.title {
+            color: #0f172a;
+            font-size: 1.8rem;
+            font-weight: 900;
+            line-height: 1.3;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+            white-space: nowrap;
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 1rem;
+            margin-bottom: 28px;
+            font-weight: 500;
+        }
+
+        .section-title {
+            text-align: left;
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .input-name {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s;
+            background-color: #f8fafc;
+            color: #0f172a;
+            font-weight: 700;
+        }
+        .input-name:focus {
+            border-color: #3b82f6;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        .option-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 12px;
+            width: 100%;
+        }
+
+        .choice-card {
+            background-color: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 18px;
+            padding: 14px 8px;
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #334155;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 70px;
+            user-select: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        .choice-card:hover {
+            border-color: #93c5fd;
+            transform: translateY(-2px);
+        }
+
+        .choice-card.active {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+            color: #ffffff;
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35);
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 20px;
+            font-size: 1.25rem;
+            font-weight: 800;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+            margin-top: 8px;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-start:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: #64748b;
+            border: none;
+            padding: 12px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            text-decoration: underline;
+        }
+
+        /* --- 遊戲進行頁面樣式 --- */
+        .hud {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-weight: 800;
+            color: #64748b;
+            font-size: 1.05rem;
+        }
+
+        .timer-container {
+            position: relative;
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 16px;
+        }
+
+        .timer-svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .timer-circle-bg {
+            fill: none;
+            stroke: #f1f5f9;
+            stroke-width: 8;
+        }
+
+        .timer-circle-progress {
+            fill: none;
+            stroke: #3b82f6;
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 251.2;
+            stroke-dashoffset: 0;
+            transition: stroke-dashoffset 0.05s linear, stroke 0.3s ease;
+        }
+
+        .timer-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: #0f172a;
+        }
+
+        .hint {
+            font-size: 0.9rem;
+            color: #3b82f6;
+            background-color: #eff6ff;
+            padding: 6px 14px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .question-box {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #0f172a;
+            margin: 10px 0 24px;
+            min-height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f8fafc;
+            border-radius: 18px;
+            border: 2px dashed #e2e8f0;
+            padding: 10px 16px;
+            letter-spacing: -0.5px;
+        }
+
+        .quiz-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .quiz-option-btn {
+            background-color: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 14px 8px;
+            font-size: 1.4rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 800;
+            color: #1e293b;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            min-height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quiz-option-btn.selected {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        .quiz-option-btn.correct {
+            background-color: #22c55e !important;
+            color: white !important;
+            border-color: #16a34a !important;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        }
+
+        .quiz-option-btn.incorrect {
+            background-color: #ef4444 !important;
+            color: white !important;
+            border-color: #dc2626 !important;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            padding: 10px 6px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        th {
+            background-color: #f8fafc;
+            color: #475569;
+            font-weight: 800;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* --- 參照 square-roots-baby 新增：返回與導覽按鈕組樣式 --- */
+        .navigation-links {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .nav-btn-link {
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            padding: 6px 10px;
+            border-radius: 8px;
+        }
+
+        .nav-btn-link:hover {
+            color: #2563eb;
+            background-color: #eff6ff;
+        }
+
+        .navigation-links .divider {
+            color: #cbd5e1;
+            font-weight: 400;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. 首頁選單 -->
+    <div id="home-screen" class="card">
+        <h1 class="title">平方數與平方根挑戰</h1>
+        <p class="subtitle">每題限時 5 秒！請在時限內選出正確答案。</p>
+
+        <div class="form-group">
+            <input type="text" id="player-name" class="input-name" placeholder="請輸入玩家暱稱" value="挑戰者">
+        </div>
+
+        <div class="form-group">
+            <div class="section-title">1. 選擇測驗模式</div>
+            <div class="option-grid">
+                <div class="choice-card active" onclick="selectMode('square', this)">平方數</div>
+                <div class="choice-card" onclick="selectMode('basic_sqrt', this)">基礎平方根</div>
+                <div class="choice-card" onclick="selectMode('adv_sqrt', this)">進階平方根</div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="section-title">2. 設定測驗題數</div>
+            <div class="option-grid">
+                <div class="choice-card active" onclick="selectCount(10, this)">10 題</div>
+                <div class="choice-card" onclick="selectCount(15, this)">15 題</div>
+                <div class="choice-card" onclick="selectCount(20, this)">20 題</div>
+            </div>
+        </div>
+
+        <button class="btn-start" onclick="startGame()">🔥 開始挑戰</button>
+        <button class="btn-secondary" onclick="showLeaderboardScreen()">🏆 查看排行榜</button>
+
+        <!-- 首頁返回按鈕組 -->
+        <div class="navigation-links">
+            <a href="index.html" class="nav-btn-link">⬅ 回難度選擇</a>
+            <span class="divider">|</span>
+            <a href="../index.html" class="nav-btn-link">🏠 回主選單</a>
+        </div>
+    </div>
+
+    <!-- 2. 遊戲進行介面 -->
+    <div id="game-screen" class="card hidden">
+        <div class="hud">
+            <span id="progress-text">題號 1/10</span>
+            <span id="score-text">得分: 0</span>
+        </div>
+
+        <div class="timer-container">
+            <svg class="timer-svg" viewBox="0 0 100 100">
+                <circle class="timer-circle-bg" cx="50" cy="50" r="40"></circle>
+                <circle id="timer-progress" class="timer-circle-progress" cx="50" cy="50" r="40"></circle>
+            </svg>
+            <div id="timer-text" class="timer-text">5</div>
+        </div>
+
+        <div id="hint-text" class="hint">單選題：點擊選項直接作答</div>
+        <div id="question" class="question-box">...</div>
+        <div id="options" class="quiz-options"></div>
+        <button id="submit-multi-btn" class="btn-start hidden" onclick="submitMultiAnswer()">確認送出</button>
+
+        <!-- 遊戲中返回按鈕組 -->
+        <div class="navigation-links">
+            <a href="index.html" class="nav-btn-link">⬅ 放棄並返回</a>
+            <span class="divider">|</span>
+            <a href="../index.html" class="nav-btn-link">🏠 回主選單</a>
+        </div>
+    </div>
+
+    <!-- 3. 排行榜與結算介面 -->
+    <div id="result-screen" class="card hidden">
+        <h1 class="title" style="font-size: 1.6rem;">測驗結束</h1>
+        <p id="result-summary" style="font-size: 1.1rem; margin: 16px 0; color: #334155; line-height: 1.6;"></p>
+        
+        <div class="section-title" style="justify-content: center; margin-top: 20px;">🏆 競賽排行榜 (前10名)</div>
+        
+        <div class="form-group" style="margin-top: 10px;">
+            <div class="option-grid">
+                <div id="board-tab-square" class="choice-card active" style="min-height: 48px; padding: 6px;" onclick="switchLeaderboardTab('square')">平方數</div>
+                <div id="board-tab-basic_sqrt" class="choice-card" style="min-height: 48px; padding: 6px;" onclick="switchLeaderboardTab('basic_sqrt')">基礎平方根</div>
+                <div id="board-tab-adv_sqrt" class="choice-card" style="min-height: 48px; padding: 6px;" onclick="switchLeaderboardTab('adv_sqrt')">進階平方根</div>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>名次</th>
+                    <th>玩家</th>
+                    <th>題數</th>
+                    <th>答對</th>
+                    <th>用時</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-body"></tbody>
+        </table>
+
+        <button class="btn-start" onclick="showHomeScreen()" style="margin-top: 24px;">🔄 再玩一次</button>
+
+        <!-- 結算頁返回按鈕組 -->
+        <div class="navigation-links">
+            <a href="index.html" class="nav-btn-link">⬅ 回難度選擇</a>
+            <span class="divider">|</span>
+            <a href="../index.html" class="nav-btn-link">🏠 回主選單</a>
+        </div>
+    </div>
+
+    <script>
+        let selectedMode = 'square';
+        let selectedCount = 10;
+        let currentLeaderboardTab = 'square';
+
+        let questions = [];
+        let currentIdx = 0;
+        let score = 0;
+        let totalTimeUsed = 0;
+        let timerInterval = null;
+        let questionStartTime = 0;
+        let selectedMultiOptions = new Set();
+        let isAnsweringBlocked = false;
+
+        const C_PERIMETER = 2 * Math.PI * 40;
+
+        function selectMode(mode, element) {
+            selectedMode = mode;
+            const cards = element.parentElement.querySelectorAll('.choice-card');
+            cards.forEach(card => card.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        function selectCount(count, element) {
+            selectedCount = count;
+            const cards = element.parentElement.querySelectorAll('.choice-card');
+            cards.forEach(card => card.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        function gcd(a, b) {
+            return b === 0 ? a : gcd(b, a % b);
+        }
+
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function shuffleArray(arr) {
+            return arr.sort(() => Math.random() - 0.5);
+        }
+
+        function generateQuestions() {
+            questions = [];
+            for (let i = 0; i < selectedCount; i++) {
+                if (selectedMode === 'square') {
+                    questions.push(generateSquareQuestion());
+                } else if (selectedMode === 'basic_sqrt') {
+                    questions.push(generateBasicSqrtQuestion());
+                } else {
+                    questions.push(generateAdvSqrtQuestion());
+                }
+            }
+        }
+
+        // --- 1. 平方數出題 ---
+        function generateSquareQuestion() {
+            const type = Math.random() < 0.5 ? 1 : 2;
+            let a, b;
+
+            if (type === 1) {
+                b = getRandomInt(11, 30);
+                a = 1;
+            } else {
+                do {
+                    a = getRandomInt(2, 30);
+                    b = getRandomInt(2, 30);
+                } while (gcd(a, b) !== 1);
+            }
+
+            const subType = getRandomInt(0, 2);
+            let qText = "";
+            let correctVal = "";
+            let wrongOptions = [];
+
+            if (subType === 0) {
+                qText = a === 1 ? `\\(${b}^2\\) = ?` : `\\(\\left(\\frac{${b}}{${a}}\\right)^2\\) = ?`;
+                correctVal = a === 1 ? `${b * b}` : `\\frac{${b * b}}{${a * a}}`;
+                wrongOptions = [
+                    a === 1 ? `${b * 2}` : `\\frac{${b * 2}}{${a}}`,
+                    a === 1 ? `${-(b * b)}` : `-\\frac{${b * b}}{${a * a}}`,
+                    a === 1 ? `${b * b + 10}` : `\\frac{${b * b}}{${a}}`
+                ];
+            } else if (subType === 1) {
+                qText = a === 1 ? `\\((-${b})^2\\) = ?` : `\\(\\left(-\\frac{${b}}{${a}}\\right)^2\\) = ?`;
+                correctVal = a === 1 ? `${b * b}` : `\\frac{${b * b}}{${a * a}}`;
+                wrongOptions = [
+                    a === 1 ? `${-(b * b)}` : `-\\frac{${b * b}}{${a * a}}`,
+                    a === 1 ? `${b * 2}` : `\\frac{${b * 2}}{${a * a}}`,
+                    a === 1 ? `${-(b * 2)}` : `-\\frac{${b * 2}}{${a}}`
+                ];
+            } else {
+                qText = a === 1 ? `\\(-${b}^2\\) = ?` : `\\(-\\frac{${b}^2}{${a}}\\) = ?`;
+                correctVal = a === 1 ? `${-(b * b)}` : `-\\frac{${b * b}}{${a}}`;
+                wrongOptions = [
+                    a === 1 ? `${b * b}` : `\\frac{${b * b}}{${a}}`,
+                    a === 1 ? `${-(b * 2)}` : `-\\frac{${b * 2}}{${a}}`,
+                    a === 1 ? `${b * 2}` : `\\frac{${b * 2}}{${a}}`
+                ];
+            }
+
+            return {
+                text: qText,
+                correct: [correctVal],
+                options: shuffleArray([correctVal, ...wrongOptions]),
+                isMulti: false
+            };
+        }
+
+        // --- 2. 基礎平方根出題 ---
+        function generateBasicSqrtQuestion() {
+            const a = getRandomInt(11, 30);
+            const sqVal = a * a;
+            const types = ['all', 'pos', 'neg'];
+            const type = types[getRandomInt(0, 2)];
+            let qText = '';
+            let correctVals = [];
+
+            if (type === 'all') {
+                qText = `\\(${sqVal}\\) 的平方根 = ?`;
+                correctVals = [`${a}`, `-${a}`];
+            } else if (type === 'pos') {
+                qText = `\\(${sqVal}\\) 的正平方根 = ?`;
+                correctVals = [`${a}`];
+            } else {
+                qText = `\\(${sqVal}\\) 的負平方根 = ?`;
+                correctVals = [`-${a}`];
+            }
+
+            let optionCandidates = [`${a}`, `-${a}`, `${a + 2}`, `-${a + 2}`];
+            let options = Array.from(new Set(optionCandidates));
+
+            return {
+                text: qText,
+                correct: correctVals,
+                options: shuffleArray(options),
+                isMulti: type === 'all'
+            };
+        }
+
+        // --- 3. 進階平方根出題 ---
+        function generateAdvSqrtQuestion() {
+            const type = Math.random() < 0.5 ? 1 : 2;
+            const askType = getRandomInt(0, 2);
+
+            let qText = "";
+            let correctVal = "";
+            let options = [];
+
+            if (type === 1) {
+                let a, b;
+                do {
+                    a = getRandomInt(1, 15);
+                    b = getRandomInt(1, 15);
+                } while (gcd(a, b) !== 1 || (a === 1 && b === 1));
+
+                const valStr = a === 1 ? `${b}` : `\\frac{${b}}{${a}}`;
+
+                if (askType === 0) {
+                    qText = `\\(${valStr}\\) 的平方根 = ?`;
+                    correctVal = `\\pm\\sqrt{${valStr}}`;
+                    options = [correctVal, `\\sqrt{${valStr}}`, `-\\sqrt{${valStr}}`, valStr];
+                } else if (askType === 1) {
+                    qText = `\\(${valStr}\\) 的正平方根 = ?`;
+                    correctVal = `\\sqrt{${valStr}}`;
+                    options = [correctVal, `-\\sqrt{${valStr}}`, `\\pm\\sqrt{${valStr}}`, valStr];
+                } else {
+                    qText = `\\(${valStr}\\) 的負平方根 = ?`;
+                    correctVal = `-\\sqrt{${valStr}}`;
+                    options = [correctVal, `\\sqrt{${valStr}}`, `\\pm\\sqrt{${valStr}}`, `-${valStr}`];
+                }
+
+            } else {
+                let x, y;
+                do {
+                    x = getRandomInt(1, 30);
+                    y = getRandomInt(1, 30);
+                } while (gcd(x, y) !== 1 || (x === 1 && y === 1));
+
+                const a = x * x;
+                const b = y * y;
+
+                const exprInner = x === 1 ? `${b}` : `\\frac{${b}}{${a}}`;
+                const qExpr = `\\sqrt{${exprInner}}`;
+                const simplifiedVal = x === 1 ? `${y}` : `\\frac{${y}}{${x}}`;
+
+                const isRootYSquare = Number.isInteger(Math.sqrt(y));
+                const isRootXSquare = Number.isInteger(Math.sqrt(x));
+                const canFullyExtract = isRootYSquare && isRootXSquare;
+
+                let rootStr = "";
+                if (canFullyExtract) {
+                    const rootY = Math.sqrt(y);
+                    const rootX = Math.sqrt(x);
+                    rootStr = rootX === 1 ? `${rootY}` : `\\frac{${rootY}}{${rootX}}`;
+                } else {
+                    rootStr = `\\sqrt{${simplifiedVal}}`;
+                }
+
+                if (askType === 0) {
+                    qText = `\\(${qExpr}\\) 的平方根 = ?`;
+                    correctVal = `\\pm${rootStr}`;
+                    options = [correctVal, `${rootStr}`, `-${rootStr}`, `\\pm${simplifiedVal}`];
+                } else if (askType === 1) {
+                    qText = `\\(${qExpr}\\) 的正平方根 = ?`;
+                    correctVal = `${rootStr}`;
+                    options = [correctVal, `-${rootStr}`, `\\pm${rootStr}`, `${simplifiedVal}`];
+                } else {
+                    qText = `\\(${qExpr}\\) 的負平方根 = ?`;
+                    correctVal = `-${rootStr}`;
+                    options = [correctVal, `${rootStr}`, `\\pm${rootStr}`, `-${simplifiedVal}`];
+                }
+            }
+
+            return {
+                text: qText,
+                correct: [correctVal],
+                options: shuffleArray(options),
+                isMulti: false
+            };
+        }
+
+        // --- 遊戲控制 ---
+        function startGame() {
+            const nameInput = document.getElementById('player-name').value.trim();
+            const playerName = nameInput || '挑戰者';
+
+            currentIdx = 0;
+            score = 0;
+            totalTimeUsed = 0;
+
+            generateQuestions();
+
+            document.getElementById('home-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentIdx >= selectedCount) {
+                endGame();
+                return;
+            }
+
+            isAnsweringBlocked = false;
+            selectedMultiOptions.clear();
+            const q = questions[currentIdx];
+
+            document.getElementById('progress-text').innerText = `題號 ${currentIdx + 1}/${selectedCount}`;
+            document.getElementById('score-text').innerText = `得分: ${score}`;
+            document.getElementById('question').innerHTML = q.text;
+
+            const hint = document.getElementById('hint-text');
+            const submitBtn = document.getElementById('submit-multi-btn');
+            if (q.isMulti) {
+                hint.innerText = "複選題：請勾選所有正確答案後點擊送出";
+                submitBtn.classList.remove('hidden');
+            } else {
+                hint.innerText = "單選題：點擊選項直接作答";
+                submitBtn.classList.add('hidden');
+            }
+
+            const optionsDiv = document.getElementById('options');
+            optionsDiv.innerHTML = '';
+            
+            q.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'quiz-option-btn';
+                btn.innerHTML = `\\(${opt}\\)`;
+                btn.onclick = () => handleOptionClick(btn, opt, q.isMulti);
+                optionsDiv.appendChild(btn);
+            });
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+
+            startCircularTimer();
+        }
+
+        function startCircularTimer() {
+            clearInterval(timerInterval);
+            const progressCircle = document.getElementById('timer-progress');
+            const timerText = document.getElementById('timer-text');
+            
+            progressCircle.style.strokeDashoffset = '0';
+            progressCircle.style.stroke = '#3b82f6';
+            
+            questionStartTime = Date.now();
+            const timeLimit = 5000;
+
+            timerInterval = setInterval(() => {
+                const elapsed = Date.now() - questionStartTime;
+                const remainingRatio = Math.max(0, (timeLimit - elapsed) / timeLimit);
+                
+                const offset = C_PERIMETER * (1 - remainingRatio);
+                progressCircle.style.strokeDashoffset = offset;
+
+                const sec = Math.ceil((timeLimit - elapsed) / 1000);
+                timerText.innerText = sec > 0 ? sec : 0;
+
+                if (remainingRatio < 0.35) {
+                    progressCircle.style.stroke = '#ef4444';
+                }
+
+                if (elapsed >= timeLimit) {
+                    clearInterval(timerInterval);
+                    totalTimeUsed += 5;
+                    handleTimeout();
+                }
+            }, 30);
+        }
+
+        function handleOptionClick(btn, val, isMulti) {
+            if (isAnsweringBlocked) return;
+
+            if (isMulti) {
+                if (selectedMultiOptions.has(val)) {
+                    selectedMultiOptions.delete(val);
+                    btn.classList.remove('selected');
+                } else {
+                    selectedMultiOptions.add(val);
+                    btn.classList.add('selected');
+                }
+            } else {
+                const usedTime = (Date.now() - questionStartTime) / 1000;
+                totalTimeUsed += usedTime;
+                clearInterval(timerInterval);
+                checkAnswer([val], btn);
+            }
+        }
+
+        function submitMultiAnswer() {
+            if (isAnsweringBlocked) return;
+            const usedTime = (Date.now() - questionStartTime) / 1000;
+            totalTimeUsed += usedTime;
+            clearInterval(timerInterval);
+            checkAnswer(Array.from(selectedMultiOptions), null);
+        }
+
+        function handleTimeout() {
+            if (isAnsweringBlocked) return;
+            checkAnswer(Array.from(selectedMultiOptions), null);
+        }
+
+        function checkAnswer(userSelected, clickedBtn) {
+            isAnsweringBlocked = true;
+            const q = questions[currentIdx];
+            
+            const isCorrect = userSelected.length === q.correct.length &&
+                              userSelected.every(v => q.correct.includes(v));
+
+            if (isCorrect) score++;
+
+            const btns = document.querySelectorAll('.quiz-option-btn');
+            btns.forEach((btn, idx) => {
+                const optVal = q.options[idx];
+                const isTargetCorrect = q.correct.includes(optVal);
+                const isUserPicked = userSelected.includes(optVal);
+
+                if (isTargetCorrect) {
+                    btn.classList.add('correct');
+                } else if (isUserPicked && !isTargetCorrect) {
+                    btn.classList.add('incorrect');
+                }
+            });
+
+            setTimeout(() => {
+                currentIdx++;
+                loadQuestion();
+            }, 1000);
+        }
+
+        function endGame() {
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+
+            const nameInput = document.getElementById('player-name').value.trim() || '挑戰者';
+            const roundedTime = Math.round(totalTimeUsed * 10) / 10;
+            document.getElementById('result-summary').innerHTML = 
+                `🎉 <b>${escapeHtml(nameInput)}</b> 完成測驗！<br>答對 <b>${score} / ${selectedCount}</b> 題，總耗時 <b>${roundedTime}</b> 秒`;
+
+            saveScore(nameInput, selectedMode, selectedCount, score, roundedTime);
+            
+            currentLeaderboardTab = selectedMode;
+            updateLeaderboardTabsUI();
+            renderLeaderboardTable();
+        }
+
+        // --- 排行榜 ---
+        function getLeaderboard(mode) {
+            const data = localStorage.getItem(`leaderboard_${mode}`);
+            return data ? JSON.parse(data) : [];
+        }
+
+        function saveScore(name, mode, totalQ, score, time) {
+            let board = getLeaderboard(mode);
+            board.push({ name, totalQ, score, time });
+
+            board.sort((a, b) => {
+                if (b.totalQ !== a.totalQ) return b.totalQ - a.totalQ;
+                if (b.score !== a.score) return b.score - a.score;
+                return a.time - b.time;
+            });
+
+            board = board.slice(0, 10);
+            localStorage.setItem(`leaderboard_${mode}`, JSON.stringify(board));
+        }
+
+        function switchLeaderboardTab(mode) {
+            currentLeaderboardTab = mode;
+            updateLeaderboardTabsUI();
+            renderLeaderboardTable();
+        }
+
+        function updateLeaderboardTabsUI() {
+            document.getElementById('board-tab-square').classList.toggle('active', currentLeaderboardTab === 'square');
+            document.getElementById('board-tab-basic_sqrt').classList.toggle('active', currentLeaderboardTab === 'basic_sqrt');
+            document.getElementById('board-tab-adv_sqrt').classList.toggle('active', currentLeaderboardTab === 'adv_sqrt');
+        }
+
+        function renderLeaderboardTable() {
+            const board = getLeaderboard(currentLeaderboardTab);
+            const tbody = document.getElementById('leaderboard-body');
+            tbody.innerHTML = '';
+
+            if (board.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="color:#94a3b8; padding: 20px;">尚無紀錄</td></tr>`;
+                return;
+            }
+
+            board.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><b>${escapeHtml(item.name)}</b></td>
+                    <td>${item.totalQ}</td>
+                    <td>${item.score}</td>
+                    <td>${item.time}s</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function showLeaderboardScreen() {
+            document.getElementById('home-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            updateLeaderboardTabsUI();
+            renderLeaderboardTable();
+        }
+
+        function showHomeScreen() {
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('home-screen').classList.remove('hidden');
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/[&<>"']/g, function(m) { 
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]; 
+            });
+        }
+    </script>
+</body>
+</html>
