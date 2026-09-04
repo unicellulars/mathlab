@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>平方數與平方根 - 選擇難度</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f4f6f9 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px 16px;
+            color: #0f172a;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 680px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 28px;
+            padding: 40px 28px;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #eff6ff;
+            color: #2563eb;
+            font-size: 0.85rem;
+            font-weight: 800;
+            padding: 6px 16px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .title {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .quiz-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .quiz-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 20px 24px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .quiz-card:hover {
+            border-color: #3b82f6;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15);
+        }
+
+        .quiz-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .icon-box {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: 800;
+            flex-shrink: 0;
+            box-shadow: 0 6px 12px rgba(37, 99, 235, 0.25);
+        }
+
+        .icon-box.baby {
+            background: linear-gradient(135deg, #10b981, #059669);
+            box-shadow: 0 6px 12px rgba(16, 185, 129, 0.25);
+        }
+
+        .quiz-details h3 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .quiz-details p {
+            font-size: 0.88rem;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .arrow-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            font-weight: 800;
+            transition: all 0.2s ease;
+        }
+
+        .quiz-card:hover .arrow-btn {
+            background: #3b82f6;
+            color: white;
+            transform: translateX(3px);
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 28px;
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: #2563eb;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <span class="badge">SQUARE & ROOTS</span>
+            <h1 class="title">平方數與平方根</h1>
+            <p class="subtitle">請選擇適合你的挑戰難度等級</p>
+        </div>
+
+        <div class="quiz-grid">
+            <!-- 等級 1：寶寶級測驗 -->
+            <a href="square-roots-baby.html" class="quiz-card">
+                <div class="quiz-info">
+                    <div class="icon-box baby">👶</div>
+                    <div class="quiz-details">
+                        <h3>寶寶級測驗</h3>
+                        <p>基礎觀念複習與極簡題目練習</p>
+                    </div>
+                </div>
+                <div class="arrow-btn">➔</div>
+            </a>
+
+            <!-- 等級 2：小學級測驗 -->
+            <a href="square-roots-child.html" class="quiz-card">
+                <div class="quiz-info">
+                    <div class="icon-box">🎒</div>
+                    <div class="quiz-details">
+                        <h3>小學級測驗</h3>
+                        <p>平方數與平方根進階速算</p>
+                    </div>
+                </div>
+                <div class="arrow-btn">➔</div>
+            </a>
+        </div>
+
+        <a href="../index.html" class="back-link">🏠 回主選單</a>
+    </div>
+
+</body>
+</html>
